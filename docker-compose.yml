@@ -1,0 +1,39 @@
+version: "3.1"
+services:
+
+    redis:
+      image: redis:alpine
+      container_name: lumen-cafe-redis
+
+    mysql:
+      image: mysql:8.0
+      container_name: lumen-cafe-mysql
+      working_dir: /application
+      volumes:
+        - .:/application
+      environment:
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=db_lumen_cafe
+        - MYSQL_USER=default_user
+        - MYSQL_PASSWORD=defaultUser12345
+      ports:
+        - "3002:3306"
+
+    webserver:
+      image: nginx:alpine
+      container_name: lumen-cafe-webserver
+      working_dir: /application
+      volumes:
+          - ./api:/application
+          - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      ports:
+       - "3000:80"
+
+    php-fpm:
+      build: phpdocker/php-fpm
+      container_name: lumen-cafe-php-fpm
+      working_dir: /application
+      volumes:
+        - ./api:/application
+        - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
+
